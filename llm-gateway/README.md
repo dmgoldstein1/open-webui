@@ -46,37 +46,33 @@ Item example:
 
 ## Local development
 
-1) Start Moto (DynamoDB + SQS). One way (requires moto[server]):
+Recommended: LocalStack + DynamoDB Local via OpenTofu
+
+1) Provision local infra (LocalStack + DynamoDB Local + queues/table):
 
 ```bash
-# If needed: python -m pip install "moto[server]" awscli-local
-# Start a single endpoint for both DynamoDB + SQS on 0.0.0.0:5000
-moto_server -H 0.0.0.0 -p 5000
+cd ../../infra/opentofu
+tofu init
+tofu apply -auto-approve
 ```
 
-2) Create the table and queues (with AWS CLI pointing to Moto):
+2) Export env vars and install deps:
 
 ```bash
-# Create DynamoDB table
-aws --endpoint-url http://localhost:5000 dynamodb create-table \
-  --table-name Conversations \
-  --attribute-definitions AttributeName=conversation_id,AttributeType=S \
-  --key-schema AttributeName=conversation_id,KeyType=HASH \
-  --billing-mode PAY_PER_REQUEST
+export AWS_REGION=us-east-1
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+export SQS_ENDPOINT_URL=http://localhost:4566
+export DYNAMODB_ENDPOINT_URL=http://localhost:8000
+export DDB_TABLE=Conversations
+export SQS_QUEUE_URL=$(tofu output -raw sqs_default_queue_url)
+export SQS_PRIORITY_QUEUE_URL=$(tofu output -raw sqs_priority_queue_url)
 
-# Create queues
-aws --endpoint-url http://localhost:5000 sqs create-queue --queue-name llm-jobs
-aws --endpoint-url http://localhost:5000 sqs create-queue --queue-name llm-jobs-priority
-```
-
-3) Configure env and install dependencies:
-
-```bash
-cp .env.example .env
+cd ../../llm-gateway
 npm install
 ```
 
-4) Run the local API and worker in two terminals:
+3) Run the local API and worker in two terminals:
 
 ```bash
 npm run start
@@ -99,7 +95,7 @@ npm run worker
 ## Production notes
 
 - Deploy `src/middleware/handler.js` as a Lambda behind API Gateway (HTTP API v2)
-- Point environment variables to real AWS endpoints (remove Moto endpoint URLs)
+- Point environment variables to real AWS endpoints (remove local emulator endpoints)
 - Use two SQS queues (priority + default) with suitable DLQs
 - Permit the worker host to reach local LLMs; when remote, consider tunneling/edge
 

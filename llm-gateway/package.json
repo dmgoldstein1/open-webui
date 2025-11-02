@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node src/local/server.js",
     "worker": "node src/worker/worker.js",
-    "test": "node tests/basic-routing.test.js",
+    "test": "node tests/basic-routing.test.js && node tests/historyStore.test.js && node tests/handler-enqueue.test.js && node tests/chat-sync.test.js",
     "lint": "node -e \"console.log('No linter configured')\""
   },
   "dependencies": {
