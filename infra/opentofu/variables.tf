@@ -53,3 +53,21 @@ variable "start_local_containers" {
   type        = bool
   default     = true
 }
+
+variable "enable_apigw" {
+  description = "Create an API Gateway HTTP API in LocalStack that proxies to the local Express server"
+  type        = bool
+  default     = false
+}
+
+variable "local_api_base_url" {
+  description = "Base URL of the local Express API for proxying (used when enable_apigw=true)"
+  type        = string
+  default     = "http://host.docker.internal:8787"
+}
+
+variable "apigw_stage_name" {
+  description = "API Gateway stage name"
+  type        = string
+  default     = "dev"
+}

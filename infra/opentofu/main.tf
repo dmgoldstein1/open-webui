@@ -114,3 +114,37 @@ output "localstack_endpoint" {
 # # resource "aws_apigatewayv2_api" "http_api" { ... }
 # # resource "aws_apigatewayv2_integration" "lambda_integration" { ... }
 # # resource "aws_apigatewayv2_route" "chat_route" { ... }
+
+# --- Optional: API Gateway in LocalStack to proxy to local Express -------------
+resource "aws_apigatewayv2_api" "llm_api" {
+  provider     = aws.localstack
+  count        = var.enable_apigw ? 1 : 0
+  name         = "llm-gateway-http-api"
+  protocol_type = "HTTP"
+}
+
+resource "aws_apigatewayv2_integration" "proxy_integration" {
+  provider                = aws.localstack
+  count                   = var.enable_apigw ? 1 : 0
+  api_id                  = aws_apigatewayv2_api.llm_api[0].id
+  integration_type        = "HTTP_PROXY"
+  integration_method      = "ANY"
+  integration_uri         = var.local_api_base_url
+  payload_format_version  = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "$default" {
+  provider = aws.localstack
+  count    = var.enable_apigw ? 1 : 0
+  api_id   = aws_apigatewayv2_api.llm_api[0].id
+  route_key = "$default"
+  target    = "integrations/${aws_apigatewayv2_integration.proxy_integration[0].id}"
+}
+
+resource "aws_apigatewayv2_stage" "dev" {
+  provider    = aws.localstack
+  count       = var.enable_apigw ? 1 : 0
+  api_id      = aws_apigatewayv2_api.llm_api[0].id
+  name        = var.apigw_stage_name
+  auto_deploy = true
+}

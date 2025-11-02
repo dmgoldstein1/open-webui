@@ -310,3 +310,6 @@ dist
 cypress/videos
 cypress/screenshots
 .vscode/settings.json
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.github/instructions/snyk_rules.instructions.md
