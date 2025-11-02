@@ -1,0 +1,21 @@
+{
+  "name": "llm-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Intelligent API gateway and worker for local LLM runtimes (vLLM and Ollama) with AWS serverless (API Gateway, SQS, DynamoDB) and Moto emulation for local dev.",
+  "main": "src/local/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/local/server.js",
+    "worker": "node src/worker/worker.js",
+    "test": "node tests/basic-routing.test.js",
+    "lint": "node -e \"console.log('No linter configured')\""
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.670.0",
+    "@aws-sdk/lib-dynamodb": "^3.670.0",
+    "@aws-sdk/client-sqs": "^3.670.0",
+    "axios": "^1.7.7",
+    "express": "^4.19.2"
+  }
+}
